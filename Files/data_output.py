@@ -69,3 +69,22 @@ def json_to_xls(json_data, xls_file):
     workbook.save(xls_file)
 
 # Example usage
+
+import base64
+
+def get_table_download_link(df_buffer, filename):
+    """
+    Generates a download link for a Pandas DataFrame.
+
+    Args:
+        df_buffer: A Pandas DataFrame buffer containing the data.
+        filename: The desired filename for the downloaded file.
+
+    Returns:
+        A string containing the HTML code for the download link.
+    """
+
+    csv = df_buffer.to_csv(index=False)
+    b64 = base64.b64encode(csv.encode()).decode()
+    href = f"data:application/octet-stream;base64,{b64}"
+    return f'<a href="{href}" download="{filename}">Download CSV</a>'

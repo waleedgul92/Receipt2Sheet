@@ -4,7 +4,8 @@ from io import BytesIO
 import os
 from PIL import Image
 from model import extract_info_img
-from data_output import json_to_csv, json_to_xls
+from data_output import json_to_csv, json_to_xls , get_table_download_link
+import time
 # Upload multiple images
 
 def create_UI():
@@ -83,7 +84,7 @@ def create_UI():
     uploaded_files_images = st.sidebar.file_uploader("Upload Images", type=["jpg", "png", "jpeg"], 
                                                         accept_multiple_files=True, label_visibility="hidden")
 
-    col1, col2, col3, col4 = st.columns([2.5, 2, 2.4, 3.7], vertical_alignment="bottom", gap="small",) # Adjust column widths to make button smaller
+    col1, col2, col3, col4 ,col5= st.columns([2.5, 2, 2.4, 3.7,3.4], vertical_alignment="bottom", gap="small",) # Adjust column widths to make button smaller
 
     with col1:
         option = st.selectbox(
@@ -95,12 +96,28 @@ def create_UI():
     with col2:
         enter_button = st.button("Generate")  # Remove use_container_width=True
 
+    with col3:
+        downlaod_button=st.download_button("Download", "Download")
+
+
     if enter_button and uploaded_files_images:
+        output_dir = "outputs"  # Specify the desired output directory name
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
         json_output=extract_info_img(uploaded_files_images)
         if option == "CSV":
-            json_to_csv(json_output, "output.csv")
+            json_to_csv(json_output, "outputs/output.csv")
+            sucess=st.success("CSV File Saved in Output Folder")
+            time.sleep(1)
+            sucess.empty()  
+           
+            
         else:
-            json_to_xls(json_output, "output.xlsx")
+            json_to_xls(json_output, "outputs/output.xlsx")
+            sucess=st.success("XLS File Saved in Outputs Folder")
+            time.sleep(1)
+            sucess.empty()  
+            
 
 if __name__ == "__main__":
     create_UI()
