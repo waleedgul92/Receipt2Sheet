@@ -4,17 +4,7 @@ from io import BytesIO
 import os
 from PIL import Image
 from model import extract_info_img
-
-# Function to convert a dataframe to CSV or Excel
-def convert_to_file(df, file_format):
-    if file_format == "CSV":
-        return df.to_csv(index=False).encode('utf-8')
-    elif file_format == "XLS":
-        output = BytesIO()
-        with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
-            df.to_excel(writer, index=False, sheet_name="Sheet1")
-        return output.getvalue()
-
+from data_output import json_to_csv, json_to_xls
 # Upload multiple images
 
 def create_UI():
@@ -106,7 +96,11 @@ def create_UI():
         enter_button = st.button("Generate")  # Remove use_container_width=True
 
     if enter_button and uploaded_files_images:
-        st.write(extract_info_img(uploaded_files_images))
+        json_output=extract_info_img(uploaded_files_images)
+        if option == "CSV":
+            json_to_csv(json_output, "output.csv")
+        else:
+            json_to_xls(json_output, "output.xlsx")
 
 if __name__ == "__main__":
     create_UI()

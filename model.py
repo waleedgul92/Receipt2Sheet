@@ -5,6 +5,7 @@ import base64
 import httpx
 from PIL import Image
 import streamlit as st
+
 # import PyPDF2
 def extract_info_img(img_paths):
     load_dotenv("keys.env")
@@ -14,26 +15,28 @@ def extract_info_img(img_paths):
         img_=Image.open(img_path)
         images_.append(img_)
     genai.configure(api_key=google_api_key)
-    model = genai.GenerativeModel(model_name="gemini-1.5-flash")  
+    model = genai.GenerativeModel(model_name="gemini-1.5-flash",
+                                   generation_config={"response_mime_type": "application/json"},
+                                   )  
     prompt = '''extract information from the image like things you bought, quantity, mart or shop name, price of that thing,
   DO NOT INCLUDE IRRELVENT INFO LIKE address, website name 
-  IF quantity is not mentioned it is one (1) and translate extracted info to english language if not in english language
+  IF quantity is not mentioned it is one (1) AND USE NAMES OF CURRENCY NOT SYMBOLS,and translate extracted info to english language if not in english language
   and return in JSON FORMAT. Sample json format is as follows:
   "receipts": [
     {
-      "shop": "Berqhotel Grosse Scheidegg",
+      "shop": str,
       "items": [
         {
-          "item": "Zdkdkdk",
-          "quantity": 2,
-          "price": 4
+          "item": str,
+          "quantity": int,
+          "price": float
         },
         # ... (other items)
       ],
-      "currency": "Cdld",
-      "total": 5
+      "currency": str,
     },  ... other receipts
-  ]'''
+  ]
+  return json object'''
     input_model=[prompt]
     for img in images_:
         input_model.append(img)
