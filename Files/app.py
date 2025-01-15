@@ -72,11 +72,11 @@ def create_UI():
     )
 
     st.markdown("<div class='welcome-message'>Welcome to Receipt2Sheet !</div>", unsafe_allow_html=True)
-    st.sidebar.title("Upload PDF(s)")
-    uploaded_pdfs = st.sidebar.file_uploader(
-        "Upload PDF File(s)", type=["pdf"], help="Upload pdf(s)", 
-        label_visibility="hidden", accept_multiple_files=True
-    )
+    # st.sidebar.title("Upload PDF(s)")
+    # uploaded_pdfs = st.sidebar.file_uploader(
+    #     "Upload PDF File(s)", type=["pdf"], help="Upload pdf(s)", 
+    #     label_visibility="hidden", accept_multiple_files=True
+    # )
 
     st.sidebar.title("Upload Image(s)")
     uploaded_files_images = st.sidebar.file_uploader(
