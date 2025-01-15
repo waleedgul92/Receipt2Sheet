@@ -1,6 +1,7 @@
 import json
 import csv
 import openpyxl
+from io import StringIO, BytesIO
 
 def clean_json_string(json_string):
     """
@@ -17,38 +18,44 @@ def clean_json_string(json_string):
     else:
         return json_string
 
-def json_to_csv(json_data, csv_file):
+def json_to_csv(json_data):
     """
-    Converts JSON data to CSV format.
+    Converts JSON data to CSV format and returns it as a string.
 
     Args:
         json_data: The JSON data to be converted.
-        csv_file: The path to the output CSV file.
+
+    Returns:
+        A string containing the CSV data.
     """
     json_data = json.loads(json_data)
-    with open(csv_file, 'w', newline='') as f:
-        fieldnames = ['shop', 'item', 'quantity', 'price', 'currency' ]
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
-        writer.writeheader()
+    output = StringIO()
+    fieldnames = ['shop', 'item', 'quantity', 'price', 'currency']
+    writer = csv.DictWriter(output, fieldnames=fieldnames)
+    writer.writeheader()
 
-        for receipt in json_data.get('receipts', []):
-            for item in receipt.get('items', []):
-                writer.writerow({
-                    'shop': receipt.get('shop', ''),
-                    'item': item.get('item', ''),
-                    'quantity': item.get('quantity', 1),
-                    'price': item.get('price', 0),
-                    'currency': receipt.get('currency', ''),
-                    # 'total': receipt.get('total', 0)
-                })
+    for receipt in json_data.get('receipts', []):
+        for item in receipt.get('items', []):
+            writer.writerow({
+                'shop': receipt.get('shop', ''),
+                'item': item.get('item', ''),
+                'quantity': item.get('quantity', 1),
+                'price': item.get('price', 0),
+                'currency': receipt.get('currency', ''),
+            })
+    
+    # Return the CSV data as a string
+    return output.getvalue()
 
-def json_to_xls(json_data, xls_file):
+def json_to_xls(json_data):
     """
-    Converts JSON data to XLSX format.
+    Converts JSON data to XLSX format and returns it as a BytesIO object.
 
     Args:
         json_data: The JSON data to be converted.
-        xls_file: The path to the output XLSX file.
+
+    Returns:
+        A BytesIO object containing the XLSX data.
     """
     workbook = openpyxl.Workbook()
     sheet = workbook.active
@@ -63,28 +70,11 @@ def json_to_xls(json_data, xls_file):
                 item.get('quantity', 1),
                 item.get('price', 0),
                 receipt.get('currency', ''),
-                # receipt.get('total', 0)
             ])
 
-    workbook.save(xls_file)
-
-# Example usage
-
-import base64
-
-def get_table_download_link(df_buffer, filename):
-    """
-    Generates a download link for a Pandas DataFrame.
-
-    Args:
-        df_buffer: A Pandas DataFrame buffer containing the data.
-        filename: The desired filename for the downloaded file.
-
-    Returns:
-        A string containing the HTML code for the download link.
-    """
-
-    csv = df_buffer.to_csv(index=False)
-    b64 = base64.b64encode(csv.encode()).decode()
-    href = f"data:application/octet-stream;base64,{b64}"
-    return f'<a href="{href}" download="{filename}">Download CSV</a>'
+    output = BytesIO()
+    workbook.save(output)
+    output.seek(0)  # Move the pointer to the beginning of the BytesIO object
+    
+    # Return the XLSX data as a BytesIO object
+    return output
