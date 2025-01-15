@@ -92,7 +92,6 @@ def pdf_to_markdown(pdf_file):
         A string containing the Markdown-formatted content.
     """
     reader = PdfReader(pdf_file)
-    print(reader)
     markdown_content = ""
     
     for page in reader.pages:
