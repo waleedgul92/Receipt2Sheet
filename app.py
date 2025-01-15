@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 from io import BytesIO
 import os
+from PIL import Image
+from model import extract_info_img
 
 # Function to convert a dataframe to CSV or Excel
 def convert_to_file(df, file_format):
@@ -34,27 +36,27 @@ def create_UI():
         }
 
         .stTextInput > div > input {
-            height: 100%;  /* Adjust height */
-            width: 100%;   /* Adjust width */
-            font-size: 14px;  /* Adjust font size */
+            height: 100%;  /* Adjust height */
+            width: 100%;   /* Adjust width */
+            font-size: 14px;  /* Adjust font size */
         }
 
         div[data-testid="column"] {
             width: fit-content !important;
             flex: unset;
-            padding-left: 20px;  /* Left padding */
+            padding-left: 20px;  /* Left padding */
         }
 
         div[data-testid="column"] * {
             width: fit-content !important;
-            vertical-align: left;  /* Align items to the left */
+            vertical-align: left;  /* Align items to the left */
         }
 
         /* Styling the file uploader to match button styles */
         .stFileUploader {
-            width: 100%;  /* Make the file uploader full width */
-            border-radius: 5px;  /* Rounded corners */
-            text-align: center;  /* Center text */
+            width: 100%;  /* Make the file uploader full width */
+            border-radius: 5px;  /* Rounded corners */
+            text-align: center;  /* Center text */
         }
 
         [data-testid='stFileUploader'] section {
@@ -63,7 +65,7 @@ def create_UI():
         }
 
         [data-testid='stFileUploader'] section > input + div {
-            display: none;  /* Hide the default uploader text */
+            display: none;  /* Hide the default uploader text */
         }
 
         /* Animation for sidebar items */
@@ -83,17 +85,28 @@ def create_UI():
 
     st.markdown("<div class='welcome-message'>Welcome to Receipt2Sheet !</div>", unsafe_allow_html=True)
     main_placeholder = st.empty()
-    st.sidebar.title("Upload  PDF(s)")
+    st.sidebar.title("Upload PDF(s)")
     uploaded_pdfs = st.sidebar.file_uploader("Upload an PDF File(s)", type=["pdf"],
-                                                    help="Upload pdf(s) ", label_visibility="hidden",accept_multiple_files=True)
+                                                 help="Upload pdf(s) ", label_visibility="hidden", accept_multiple_files=True)
 
     st.sidebar.title("Upload Image(s)")
-    uploaded_files_images = st.sidebar.file_uploader("Upload Images", type=["jpg", "png", "jpeg"], accept_multiple_files=True,label_visibility="hidden")
+    uploaded_files_images = st.sidebar.file_uploader("Upload Images", type=["jpg", "png", "jpeg"], 
+                                                        accept_multiple_files=True, label_visibility="hidden")
 
+    col1, col2, col3, col4 = st.columns([2.5, 2, 2.4, 3.7], vertical_alignment="bottom", gap="small",) # Adjust column widths to make button smaller
 
-    option = st.selectbox(
-            'Ouput Format', 
-                 ('CSV', 'XLS'))
-    enter_button=st.button("Generate")
+    with col1:
+        option = st.selectbox(
+            'Output Format', 
+            ('CSV', 'XLS'),
+            key="output_format"  # Add a key to avoid duplicate IDs
+        )
+
+    with col2:
+        enter_button = st.button("Generate")  # Remove use_container_width=True
+
+    if enter_button and uploaded_files_images:
+        st.write(extract_info_img(uploaded_files_images))
+
 if __name__ == "__main__":
     create_UI()
