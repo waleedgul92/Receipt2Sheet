@@ -42,3 +42,33 @@ def extract_info_img(img_paths):
         input_model.append(img)
     response = model.generate_content(input_model)
     return response.text
+
+
+def extract_info_markdown(markdown):
+    load_dotenv("keys.env")
+    google_api_key = os.getenv("Gemini_key")
+    genai.configure(api_key=google_api_key)
+    model = genai.GenerativeModel(model_name="gemini-1.5-flash",
+                                   generation_config={"response_mime_type": "application/json"},
+                                   )  
+    prompt = '''extract information from the markdown file like things you bought, quantity, mart or shop name, price of that thing,
+  DO NOT INCLUDE IRRELVENT INFO LIKE address, website name 
+  IF quantity is not mentioned it is one (1) AND USE NAMES OF CURRENCY NOT SYMBOLS,and translate extracted info to english language if not in english language
+  and return in JSON FORMAT. Sample json format is as follows:
+  "receipts": [
+    {
+      "shop": str,
+      "items": [
+        {
+          "item": str,
+          "quantity": int,
+          "price": float
+        },
+        # ... (other items)
+      ],
+      "currency": str,
+    },  ... other receipts
+  ]
+  return json object'''
+    response = model.generate_content([prompt,markdown])
+    return response.text

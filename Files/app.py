@@ -3,8 +3,8 @@ import pandas as pd
 from io import BytesIO
 import os
 from PIL import Image
-from model import extract_info_img
-from data_output import json_to_csv, json_to_xls
+from model import extract_info_img , extract_info_markdown
+from data_output import json_to_csv, json_to_xls , pdf_to_markdown
 import time
 
 def create_UI():
@@ -72,11 +72,10 @@ def create_UI():
     )
 
     st.markdown("<div class='welcome-message'>Welcome to Receipt2Sheet !</div>", unsafe_allow_html=True)
-    # st.sidebar.title("Upload PDF(s)")
-    # uploaded_pdfs = st.sidebar.file_uploader(
-    #     "Upload PDF File(s)", type=["pdf"], help="Upload pdf(s)", 
-    #     label_visibility="hidden", accept_multiple_files=True
-    # )
+    st.sidebar.title("Upload a PDF")
+    uploaded_pdf = st.sidebar.file_uploader(
+        "Upload a PDF file", type=["pdf"], help="Upload a single PDF file for conversion" , label_visibility="hidden"
+    )
 
     st.sidebar.title("Upload Image(s)")
     uploaded_files_images = st.sidebar.file_uploader(
@@ -119,6 +118,26 @@ def create_UI():
                 file_name="output.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
-
+    elif generate_button and uploaded_pdf:
+        # Convert PDF to Markdown
+        st.info("Processing Pdf...")
+        markdown_content = pdf_to_markdown(uploaded_pdf)
+        json_output = extract_info_markdown(markdown_content)
+        if option == "CSV":
+            csv_data = json_to_csv(json_output)
+            download_placeholder.download_button(
+                label="Download",
+                data=csv_data,
+                file_name="output.csv",
+                mime="text/csv"
+            )
+        elif option == "XLS":
+            xls_data = json_to_xls(json_output)
+            download_placeholder.download_button(
+                label="Download",
+                data=xls_data.getvalue(),
+                file_name="output.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
 if __name__ == "__main__":
     create_UI()

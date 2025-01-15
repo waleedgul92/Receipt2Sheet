@@ -2,7 +2,8 @@ import json
 import csv
 import openpyxl
 from io import StringIO, BytesIO
-
+from PyPDF2 import PdfReader
+import markdownify
 def clean_json_string(json_string):
     """
     Removes triple quotes from the beginning and end of a JSON string.
@@ -78,3 +79,24 @@ def json_to_xls(json_data):
     
     # Return the XLSX data as a BytesIO object
     return output
+
+
+def pdf_to_markdown(pdf_file):
+    """
+    Converts the text content of a PDF file into Markdown format.
+
+    Args:
+        pdf_file: The uploaded PDF file.
+
+    Returns:
+        A string containing the Markdown-formatted content.
+    """
+    reader = PdfReader(pdf_file)
+    print(reader)
+    markdown_content = ""
+    
+    for page in reader.pages:
+        text = page.extract_text()
+        markdown_content += markdownify.markdownify(text or "", heading_style="ATX")
+        markdown_content += "\n\n"  # Add spacing between pages
+    return markdown_content
