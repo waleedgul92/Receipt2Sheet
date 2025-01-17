@@ -2,9 +2,6 @@ import json
 import csv
 import openpyxl
 from io import StringIO, BytesIO
-from PyPDF2 import PdfReader
-import markdownify
-
 def clean_json_string(json_string):
     """
     Removes triple quotes from the beginning and end of a JSON string.
