@@ -3,8 +3,8 @@ import pandas as pd
 from io import BytesIO
 import os
 from PIL import Image
-from model import extract_info_img , extract_info_markdown
-from data_output import json_to_csv, json_to_xls , pdf_to_markdown
+from model import extract_info_img
+from data_output import json_to_csv, json_to_xls
 import time
 
 def create_UI():
@@ -71,11 +71,18 @@ def create_UI():
         unsafe_allow_html=True
     )
 
-    st.markdown("<div class='welcome-message'>Welcome to Receipt2Sheet !</div>", unsafe_allow_html=True)
-    st.sidebar.title("Upload a PDF")
-    uploaded_pdf = st.sidebar.file_uploader(
-        "Upload a PDF file", type=["pdf"], help="Upload a single PDF file for conversion" , label_visibility="hidden"
+    st.markdown("<div class='welcome-message'>Welcome to Receipt2Sheet!</div>", unsafe_allow_html=True)
+    
+    st.sidebar.title("Settings")
+    
+    # Language selection dropdown
+    language = st.sidebar.selectbox(
+        "Select Language for Extraction",
+        ["English", "Spanish", "French", "German", "Chinese", "Japanese", "Korean", "Hindi",'Urdu',"Arabic"],
+        key="language_selection"
     )
+    
+
 
     st.sidebar.title("Upload Image(s)")
     uploaded_files_images = st.sidebar.file_uploader(
@@ -83,7 +90,7 @@ def create_UI():
         accept_multiple_files=True, label_visibility="hidden"
     )
 
-    col1, col2, col3, col4 ,col5= st.columns([2.5, 2, 2.4, 3.7,3.4],vertical_alignment="bottom",gap="small")  # Adjust column widths
+    col1, col2, col3, col4, col5 = st.columns([2.5, 2, 2.4, 3.7, 3.4], vertical_alignment="bottom", gap="small")  # Adjust column widths
 
     with col1:
         option = st.selectbox(
@@ -99,8 +106,8 @@ def create_UI():
         download_placeholder = st.empty()
 
     if generate_button and uploaded_files_images:
-        st.info("Processing image(s)...")
-        json_output = extract_info_img(uploaded_files_images)
+        st.info(f"Processing image(s) with language: {language}...")
+        json_output = extract_info_img(uploaded_files_images, language)  # Pass language to the function if supported
 
         if option == "CSV":
             csv_data = json_to_csv(json_output)
@@ -118,26 +125,6 @@ def create_UI():
                 file_name="output.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
-    elif generate_button and uploaded_pdf:
-        # Convert PDF to Markdown
-        st.info("Processing Pdf...")
-        markdown_content = pdf_to_markdown(uploaded_pdf)
-        json_output = extract_info_markdown(markdown_content)
-        if option == "CSV":
-            csv_data = json_to_csv(json_output)
-            download_placeholder.download_button(
-                label="Download",
-                data=csv_data,
-                file_name="output.csv",
-                mime="text/csv"
-            )
-        elif option == "XLS":
-            xls_data = json_to_xls(json_output)
-            download_placeholder.download_button(
-                label="Download",
-                data=xls_data.getvalue(),
-                file_name="output.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            )
+
 if __name__ == "__main__":
     create_UI()

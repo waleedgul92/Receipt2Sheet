@@ -4,6 +4,7 @@ import openpyxl
 from io import StringIO, BytesIO
 from PyPDF2 import PdfReader
 import markdownify
+
 def clean_json_string(json_string):
     """
     Removes triple quotes from the beginning and end of a JSON string.
@@ -21,7 +22,7 @@ def clean_json_string(json_string):
 
 def json_to_csv(json_data):
     """
-    Converts JSON data to CSV format and returns it as a string.
+    Converts JSON data to CSV format and returns it as a string, preserving special characters.
 
     Args:
         json_data: The JSON data to be converted.
@@ -32,7 +33,7 @@ def json_to_csv(json_data):
     json_data = json.loads(json_data)
     output = StringIO()
     fieldnames = ['shop', 'item', 'quantity', 'price', 'currency']
-    writer = csv.DictWriter(output, fieldnames=fieldnames)
+    writer = csv.DictWriter(output, fieldnames=fieldnames, quoting=csv.QUOTE_MINIMAL, quotechar='"')
     writer.writeheader()
 
     for receipt in json_data.get('receipts', []):
@@ -45,12 +46,12 @@ def json_to_csv(json_data):
                 'currency': receipt.get('currency', ''),
             })
     
-    # Return the CSV data as a string
-    return output.getvalue()
+    # Return the CSV data as a string with UTF-8 encoding to preserve special characters
+    return output.getvalue().encode('utf-8').decode('utf-8')
 
 def json_to_xls(json_data):
     """
-    Converts JSON data to XLSX format and returns it as a BytesIO object.
+    Converts JSON data to XLSX format and returns it as a BytesIO object, preserving special characters.
 
     Args:
         json_data: The JSON data to be converted.
@@ -80,22 +81,3 @@ def json_to_xls(json_data):
     # Return the XLSX data as a BytesIO object
     return output
 
-
-def pdf_to_markdown(pdf_file):
-    """
-    Converts the text content of a PDF file into Markdown format.
-
-    Args:
-        pdf_file: The uploaded PDF file.
-
-    Returns:
-        A string containing the Markdown-formatted content.
-    """
-    reader = PdfReader(pdf_file)
-    markdown_content = ""
-    
-    for page in reader.pages:
-        text = page.extract_text()
-        markdown_content += markdownify.markdownify(text or "", heading_style="ATX")
-        markdown_content += "\n\n"  # Add spacing between pages
-    return markdown_content
