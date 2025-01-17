@@ -18,11 +18,12 @@ def extract_info_img(img_paths):
     model = genai.GenerativeModel(model_name="gemini-1.5-flash",
                                    generation_config={"response_mime_type": "application/json"},
                                    )  
-    prompt = '''extract information from the image like things you bought, quantity, mart or shop name, price of that thing,
+    prompt = '''before extracting info from image , identify language and consider special characters of that language in image(s) and then 
+    extract information from the image like things you bought, quantity, mart or shop name, price of that thing,
   DO NOT INCLUDE IRRELVENT INFO LIKE address, website name 
   IF quantity is not mentioned it is one (1) AND USE NAMES OF CURRENCY NOT SYMBOLS AND FIGURE OUT it is comma(,) or (.) dot in context of price and quantity 
-   Identify schemes liek pfab and other and  quantities like quantity x price (quantiy multiply price) or quantity / price (quantiy divide price)
-    , and translate extracted info to english language if not in english language ,IF NAMES CANT BE TRANSLATED Leave it as original language
+   Identify schemes liek pfab and other and  quantities like quantity x price (quantiy multiply price) or quantity / price (quantiy  divide price)
+    , and translate extracted info to english language if not in english language ,Hnadle special characters in names like Ü , Ö other charcters,  IF NAMES CANT BE TRANSLATED Leave it as original language ,
   and return in JSON FORMAT. Sample json format is as follows:
   "receipts": [
     {
