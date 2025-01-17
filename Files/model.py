@@ -4,37 +4,66 @@ import google.generativeai as genai
 from PIL import Image
 import streamlit as st
 import json
-
+import re
+import unicodedata
+from googletrans  import Translator 
 # Load environment variables for API keys
-load_dotenv("keys.env")
-google_api_key = os.getenv("Gemini_key")
+
+
+def clean_item_name_general(name):
+    """
+    Cleans, normalizes, and translates item names for better readability and translation across languages.
+
+    Args:
+        name: The raw item name as a string.
+
+    Returns:
+        A cleaned, normalized, and translated string.
+    """
+    # Normalize Unicode (e.g., split combined characters like 'é' into 'e' + accent)
+    name = unicodedata.normalize('NFKC', name)
+
+    # Insert space between lowercase and uppercase letters (e.g., "BioGem" → "Bio Gem")
+    name = re.sub(r'(?<=[a-z])(?=[A-Z])', ' ', name)
+
+    # Replace common separators with spaces
+    name = re.sub(r'[._\-]', ' ', name)
+
+    # Replace non-alphanumeric characters (but preserve accents and non-Latin scripts)
+    name = re.sub(r'[^\w\s]', ' ', name)
+
+    # Remove extra whitespace
+    name = re.sub(r'\s+', ' ', name).strip()
+
+    # Initialize the Google Translator
+    translator = Translator()
+
+    # Translate the cleaned text to English
+    try:
+        translated = translator.translate(name, dest='en')
+        return translated.text  # Return the translated text
+    except Exception as e:
+        print(f"Translation failed: {e}")
+        return name  # If translation fails, return the original cleaned name
+
 
 def simple_translate(text, target_language='en'):
     """
-    Simple translation function to translate text into English while handling dots in item names.
+    Simple translation function to clean and normalize text into English.
 
     Args:
         text (str): The text to translate.
         target_language (str): The target language for translation ('en' for English).
     
     Returns:
-        str: Translated text, with dots preserved in names.
+        str: Cleaned and normalized text.
     """
-    # Split the text into words and preserve any dots
-    words = text.split(" ")
-    
-    translated_words = []
-    for word in words:
-        # If the word contains a dot, treat it as a product name or abbreviation and leave it unchanged
-        if "." in word:
-            translated_words.append(word)
-        else:
-            # In a full translation system, this would be the place to translate using an API
-            translated_words.append(word)  # Placeholder for actual translation logic
-
-    return " ".join(translated_words)
+    # Clean and normalize the item name using the general function
+    return clean_item_name_general(text)
 
 def extract_info_img(img_paths, language):
+    load_dotenv("keys.env")
+    google_api_key = os.getenv("Gemini_key")
     images_ = []
     for img_path in img_paths:
         img_ = Image.open(img_path)
@@ -47,7 +76,7 @@ def extract_info_img(img_paths, language):
     )
     
     prompt = f'''
-1) Extract receipt information from the image, which is in  ''' +language + ''' .
+1) Extract receipt information from the image, which is in  '''+language +'''.
 2) Ensure all item names are written in English. If the items' names are not in English, translate them to English or provide their English equivalents.
 3) Extract the following information from the image:
    - **Shop or Mart Name**
@@ -55,7 +84,6 @@ def extract_info_img(img_paths, language):
    - **Quantities** (if unspecified, assume `1`)
    - **Prices**
    - **Currency Type** (infer from context, using the full name instead of symbols)
-   - Any **Schemes** (e.g., "pfab" or similar) along with their associated details.
 4) Structure the extracted information into the following JSON format:
    ```json
    {
@@ -91,21 +119,10 @@ def extract_info_img(img_paths, language):
         st.error("Failed to decode JSON response.")
         return None
 
-    # Extract item names and translate if needed
-    item_names = []
+    # Extract and clean item names
     for receipt in extracted_data.get('receipts', []):
         for item in receipt.get('items', []):
-            item_names.append(item.get('item', ''))
-
-    # Translate the item names into English using the simple translation function
-    translated_item_names = [simple_translate(item_name) for item_name in item_names]
-
-    # Update item names in the JSON structure with the translated names
-    item_index = 0
-    for receipt in extracted_data.get('receipts', []):
-        for item in receipt.get('items', []):
-            item['item'] = translated_item_names[item_index]
-            item_index += 1
+            item['item'] = simple_translate(item.get('item', ''))
 
     # Return the updated JSON structure
     return json.dumps(extracted_data, ensure_ascii=False, indent=4)
