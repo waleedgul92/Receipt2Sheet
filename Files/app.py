@@ -99,7 +99,7 @@ def create_UI():
         download_placeholder = st.empty()
 
     if generate_button and uploaded_files_images:
-        st.info("Processing images...")
+        st.info("Processing image(s)...")
         json_output = extract_info_img(uploaded_files_images)
 
         if option == "CSV":
