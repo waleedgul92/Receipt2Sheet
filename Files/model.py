@@ -23,7 +23,7 @@ def extract_info_img(img_paths):
   DO NOT INCLUDE IRRELVENT INFO LIKE address, website name 
   IF quantity is not mentioned it is one (1) AND USE NAMES OF CURRENCY NOT SYMBOLS AND FIGURE OUT it is comma(,) or (.) dot in context of price and quantity 
    Identify schemes liek pfab and other and  quantities like quantity x price (quantiy multiply price) or quantity / price (quantiy  divide price)
-    , and translate extracted info to english language if not in english language ,Hnadle special characters in names like Ü , Ö other charcters,  IF NAMES CANT BE TRANSLATED Leave it as original language ,
+    , and translate extracted info to english language if not in english language ,Hnadle special characters in names like Ü , Ö other charcters,
   and return in JSON FORMAT. Sample json format is as follows:
   "receipts": [
     {
