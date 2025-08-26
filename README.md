@@ -11,7 +11,7 @@ This application provides a user-friendly interface to upload receipt images, ex
   * **Extracts data from receipt images**: Processes single or multiple receipt images.
   * **Multiple language support**: Can extract information from receipts in various languages, including English, Spanish, French, German, Chinese, Japanese, Korean, Hindi, Urdu, and Arabic.
   * **Multiple output formats**: Generates output in both CSV and XLS formats.
-  * **AI-powered data extraction**: Uses the `gemini-1.5-flash` model for accurate and intelligent data extraction.
+  * **AI-powered data extraction**: Uses the `gemini-2.5-flash` model for accurate and intelligent data extraction.
   * **Data refinement**: Includes a function to refine the extracted data for better accuracy.
   * **User-friendly interface**: Built with Streamlit for a simple and intuitive user experience.
 
